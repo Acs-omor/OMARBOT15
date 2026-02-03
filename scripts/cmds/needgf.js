@@ -1,68 +1,74 @@
-const axios = require("axios");
-const fs = require("fs-extra");
-const path = require("path");
-const https = require("https");
-
-function decode(b64) {
-  return Buffer.from(b64, "base64").toString("utf-8");
-}
-
-async function downloadImage(url, filePath) {
-  return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(filePath);
-    https.get(url, res => {
-      if (res.statusCode !== 200)
-        return reject(new Error(`Image fetch failed with status: ${res.statusCode}`));
-      res.pipe(file);
-      file.on("finish", () => file.close(resolve));
-    }).on("error", err => {
-      fs.unlink(filePath, () => reject(err));
-    });
-  });
-}
-
-const encodedUrl = "aHR0cHM6Ly9yYXNpbi1hcGlzLm9ucmVuZGVyLmNvbQ==";
-const encodedKey = "cnNfaGVpNTJjbTgtbzRvai11Y2ZjLTR2N2MtZzE=";
-
 module.exports = {
   config: {
     name: "needgf",
-    version: "3.0.1",
-    author: "MOHAMMAD AKASH",
-    countDown: 10,
+    aliases: ["needgfimg", "needgfimage"],
+    version: "1.0",
+    author: "YourName",
+    countDown: 5,
     role: 0,
-    shortDescription: "তোর Gf এর প্রোফাইল পিক দেখায় 😍",
-    longDescription: "সিঙ্গেলদের জন্য বিশেষ কমান্ড 💔 প্রতি বার নতুন সুন্দরী মেয়ের প্রোফাইল 😚",
-    category: "fun",
+    shortDescription: "Sends a random needgf image",
+    longDescription: "This module sends a random image from the provided needgf image links.",
+    category: "media",
+    guide: "{pn}"
   },
 
-  onStart: async function ({ message, event }) {
+  onStart: async function ({ api, event }) {
+    const links = [
+      "https://files.catbox.moe/6m3o6q.jpg",
+      "https://files.catbox.moe/dzrzzc.jpg",
+      "https://files.catbox.moe/sibi79.jpg",
+      "https://files.catbox.moe/9qomgb.jpg",
+      "https://files.catbox.moe/4zq75m.jpg",
+      "https://files.catbox.moe/psved4.jpg",
+      "https://files.catbox.moe/m0xkkw.jpg",
+      "https://files.catbox.moe/e53ix0.jpg",
+      "https://files.catbox.moe/ohkq7n.jpg",
+      "https://files.catbox.moe/j3e7rc.jpg",
+      "https://files.catbox.moe/0w4wqc.jpg",
+      "https://files.catbox.moe/sfde92.jpg",
+      "https://files.catbox.moe/pmcq56.jpg",
+      "https://files.catbox.moe/xk4x0k.jpg",
+      "https://files.catbox.moe/v848h4.jpg",
+      "https://files.catbox.moe/k0u1u8.jpg",
+      "https://files.catbox.moe/e8evtt.jpg",
+      "https://files.catbox.moe/epatrq.jpg",
+      "https://files.catbox.moe/4h6jkh.jpg",
+      "https://files.catbox.moe/d7kbo7.jpg",
+      "https://files.catbox.moe/wpg9o5.jpg",
+      "https://files.catbox.moe/p7txmw.jpg",
+      "https://files.catbox.moe/56tb5b.jpg",
+      "https://files.catbox.moe/lja2qa.jpg",
+      "https://files.catbox.moe/9oct5c.jpg",
+      "https://files.catbox.moe/hw5waq.jpg",
+      "https://files.catbox.moe/zjwq40.jpg",
+      "https://files.catbox.moe/r7zl8l.jpg",
+      "https://files.catbox.moe/g2hg0v.jpg",
+      "https://files.catbox.moe/zex66g.jpg",
+      "https://files.catbox.moe/484atr.jpg",
+      "https://files.catbox.moe/2uza4h.jpg",
+      "https://files.catbox.moe/30y7uf.jpg",
+      "https://files.catbox.moe/85wx7t.jpg",
+      "https://files.catbox.moe/0w4wqc.jpg",
+      "https://files.catbox.moe/vjzzj0.jpg",
+      "https://files.catbox.moe/j3e7rc.jpg",
+      "https://files.catbox.moe/mks2om.jpg",
+      "https://files.catbox.moe/ohkq7n.jpg"
+    ];
+
+    const randomIndex = Math.floor(Math.random() * links.length);
+    const selectedImage = links[randomIndex];
+
     try {
-      const apiUrl = decode(encodedUrl);
-      const apiKey = decode(encodedKey);
-      const fullUrl = `${apiUrl}/api/rasin/gf?apikey=${apiKey}`;
-
-      const res = await axios.get(fullUrl);
-      const imgUrl = res.data?.data?.url;
-
-      if (!imgUrl)
-        return message.reply("⚠️ ছবি পাওয়া যায়নি ভাই 😭 আবার চেষ্টা করো!");
-
-      const imgPath = path.join(__dirname, "tmp", `${event.senderID}_gf.jpg`);
-      await downloadImage(imgUrl, imgPath);
-
-      const replyMsg = `🌸✨ আপনার ভাগ্য জেগেছে ভাই!\nএমন সুন্দরী গফ সবাই পায় না 💕\n👇 নিচে দেখুন আপনার গফের প্রোফাইল 😚`;
-
-      await message.reply({
-        body: replyMsg,
-        attachment: fs.createReadStream(imgPath)
-      });
-
-      fs.unlinkSync(imgPath);
-
-    } catch (err) {
-      console.error("❌ Error:", err.message);
-      message.reply("⚠️ কিছু একটা গন্ডগোল হইছে ভাই 😭 পরে আবার চেষ্টা করো!");
+      return api.sendMessage(
+        {
+          body: `Here’s a random needgf image for you!`,
+          attachment: await global.utils.getStreamFromURL(selectedImage)
+        },
+        event.threadID,
+        event.messageID
+      );
+    } catch (error) {
+      return api.sendMessage(`Error: ${error.message}`, event.threadID, event.messageID);
     }
   }
 };
