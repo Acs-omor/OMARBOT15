@@ -1,20 +1,20 @@
 module.exports = {
   config: {
-    name: "autocall",
+    name: "mentionCall",
     version: "1.0",
     author: "OMAR",
     role: 0,
-    shortDescription: "Auto mention call",
-    longDescription: "Automatically sends a random caption when someone is mentioned",
+    shortDescription: "Mention call auto caption",
+    longDescription: "যে কাউকে mention দিলে সুন্দর caption পাঠাবে",
     category: "group"
   },
 
-  onChat: async function ({ api, event }) {
+  onMessage: async function ({ api, event }) {
 
-    // যদি mention না থাকে তাহলে কিছু করবে না
+    // যদি কাউকে mention না করা হয়
     if (!event.mentions || Object.keys(event.mentions).length === 0) return;
 
-    // নিজের bot mention হলে ignore করবে
+    // bot নিজের ID ignore করবে
     if (Object.keys(event.mentions).includes(api.getCurrentUserID())) return;
 
     const captions = [
@@ -41,14 +41,14 @@ module.exports = {
     ];
 
     const msg = captions[Math.floor(Math.random() * captions.length)];
-    const mentionIDs = Object.keys(event.mentions);
 
     return api.sendMessage({
       body: msg,
-      mentions: mentionIDs.map(id => ({
+      mentions: Object.keys(event.mentions).map(id => ({
         id,
         tag: event.mentions[id]
       }))
-    }, event.threadID);
+    }, event.threadID, event.messageID);
+
   }
 };
