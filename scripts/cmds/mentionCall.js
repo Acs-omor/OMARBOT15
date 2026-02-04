@@ -2,20 +2,26 @@ module.exports = {
   config: {
     name: "mentionCall",
     version: "1.0",
-    author: "OMAR",
+    author: "Omar",
     role: 0,
-    shortDescription: "Mention call auto caption",
-    longDescription: "যে কাউকে mention দিলে সুন্দর caption পাঠাবে",
+    shortDescription: "Send a caption to the mentioned user",
+    longDescription: "When someone is mentioned, sends a random caption to that user only",
     category: "group"
   },
 
   onMessage: async function ({ api, event }) {
 
-    // যদি কাউকে mention না করা হয়
+    // যদি mention না থাকে, কিছু করবে না
     if (!event.mentions || Object.keys(event.mentions).length === 0) return;
 
-    // bot নিজের ID ignore করবে
-    if (Object.keys(event.mentions).includes(api.getCurrentUserID())) return;
+    const botID = api.getCurrentUserID();
+
+    // শুধুমাত্র first mentioned user কে handle করবে
+    let mentionIDs = Object.keys(event.mentions).filter(id => id !== botID);
+    if (mentionIDs.length === 0) return;
+
+    const userID = mentionIDs[0]; // প্রথম যাকে mention দেওয়া হয়েছে
+    const userTag = event.mentions[userID];
 
     const captions = [
       "📢 আপনাকে ডাকা হচ্ছে, দ্রুত গ্রুপে হাজির হন!",
@@ -25,7 +31,7 @@ module.exports = {
       "⏰ সময় হয়েছে হাজির হওয়ার!",
       "🔥 গ্রুপ জমে গেছে, শুধু আপনাকেই দরকার!",
       "💬 আলোচনা চলছে — আপনাকে ছাড়া অসম্পূর্ণ!",
-      "⚡ দ্রুত আসুন! বিশেষ ডাক এসেছে।",
+      "⚡ দ্রুত আসুন! বিশেষ ডাক এসেছে!",
       "🎯 টার্গেট আপনি 😄 এখনই রিপোর্ট করুন!",
       "📣 আপনাকে অবিলম্বে হাজির হতে বলা হচ্ছে!",
       "😎 আপনাকে ছাড়া গ্রুপটা ফাঁকা লাগছে!",
@@ -42,13 +48,13 @@ module.exports = {
 
     const msg = captions[Math.floor(Math.random() * captions.length)];
 
+    // শুধু যে user কে mention দিয়েছে তাকে পাঠানো হচ্ছে
     return api.sendMessage({
       body: msg,
-      mentions: Object.keys(event.mentions).map(id => ({
-        id,
-        tag: event.mentions[id]
-      }))
+      mentions: [{
+        id: userID,
+        tag: userTag
+      }]
     }, event.threadID, event.messageID);
-
   }
 };
