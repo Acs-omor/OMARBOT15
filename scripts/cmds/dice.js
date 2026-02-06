@@ -1,4 +1,4 @@
-!cmd install dice.js const dailyLimit = 15;
+const dailyLimit = 15;
 
 module.exports = {
   config: {
