@@ -4,7 +4,7 @@ module.exports = {
   config: {
     name: "info",
     version: "2.5.3",
-    author: "ST | Sheikh Tamim",
+    author: "OMAR FARUK",
     role: 0,
     countDown: 20,
     shortDescription: {
